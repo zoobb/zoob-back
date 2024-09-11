@@ -34,7 +34,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if r.Method == http.MethodGet {
+	if r.Method == http.MethodPost {
 		w.WriteHeader(http.StatusOK)
 		body, err := io.ReadAll(r.Body)
 		if err != nil {
@@ -45,7 +45,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	randomInt := randIntInRange(1, 100)
 
 	_, err := w.Write([]byte(strconv.Itoa(randomInt)))
-	log.Println("Random number sent: ", randomInt)
+	log.Println("Random number sent:", randomInt)
 	if err != nil {
 		return
 	}
