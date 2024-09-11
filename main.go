@@ -38,7 +38,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		body, err := io.ReadAll(r.Body)
 		if err != nil {
-			http.Error(w, "There is an error occured reading request: ", http.StatusInternalServerError)
+			http.Error(w, "There is an error occurred reading request: ", http.StatusInternalServerError)
 		}
 		log.Println("Request body: " + string(body))
 	}
