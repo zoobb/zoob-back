@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"math/rand"
@@ -21,38 +22,35 @@ func init() {
 func main() {
 	var todoList []string
 	port := 8247
+	/*var serverURL = url.URL{
+		Scheme: "http",
+		Host:   fmt.Sprintf("localhost:%d", port),
+	}*/
 
-	http.HandleFunc("/", handlePingReq)
-	http.HandleFunc("/list", handleAddToListReq(todoList))
+	http.HandleFunc("POST /", handlePingReq)
+	http.HandleFunc("POST /list", handleAddToListReq(todoList))
 	// I KNOW
-	log.Println("Server started on port " + strconv.Itoa(port))
-	err := http.ListenAndServe("localhost:"+strconv.Itoa(port), nil)
+	log.Println("Server started on port ", port)
+	err := http.ListenAndServe(fmt.Sprintf(":%d", port), nil)
 	if err != nil {
+		log.Fatal("There's an error occurred running server: ", err)
 		return
 	}
 }
 
 func handlePingReq(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 
-	if r.Method == http.MethodOptions {
-		w.WriteHeader(http.StatusOK)
-		return
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, "There is an error occurred reading request: ", http.StatusInternalServerError)
 	}
+	log.Println("Request body: " + string(body))
 
-	if r.Method == http.MethodPost {
-		w.WriteHeader(http.StatusOK)
-		body, err := io.ReadAll(r.Body)
-		if err != nil {
-			http.Error(w, "There is an error occurred reading request: ", http.StatusInternalServerError)
-		}
-		log.Println("Request body: " + string(body))
-	}
 	randomInt := randIntInRange(1, 100)
 
-	_, err := w.Write([]byte(strconv.Itoa(randomInt)))
+	w.WriteHeader(http.StatusOK)
+	_, err = w.Write([]byte(strconv.Itoa(randomInt)))
 	log.Println("Random number sent:", randomInt)
 	if err != nil {
 		return
@@ -62,27 +60,18 @@ func handlePingReq(w http.ResponseWriter, r *http.Request) {
 func handleAddToListReq(l []string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusOK)
+		var reqBody AddToListReqBody
+		err := json.NewDecoder(r.Body).Decode(&reqBody)
+		if err != nil {
+			http.Error(w, "Invalid request body", http.StatusBadRequest)
 			return
 		}
+		log.Println("Request body:", reqBody)
 
-		if r.Method == http.MethodPost {
-			var reqBody AddToListReqBody
-			err := json.NewDecoder(r.Body).Decode(&reqBody)
-			if err != nil {
-				http.Error(w, "Invalid request body", http.StatusBadRequest)
-				return
-			}
-			log.Println("Request body:", reqBody)
-
-			l = append(l, reqBody.ListItem)
-			log.Println(l)
-			w.WriteHeader(http.StatusOK)
-		}
+		l = append(l, reqBody.ListItem)
+		log.Println(l)
+		w.WriteHeader(http.StatusOK)
 	}
 }
 
