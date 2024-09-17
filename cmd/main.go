@@ -5,7 +5,7 @@ import (
 	"log"
 	"math/rand"
 	"time"
-	"zoob-back/api"
+	"zoob-back/internal/server"
 )
 
 func init() {
@@ -14,7 +14,7 @@ func init() {
 
 func main() {
 	port := 8247
-	server := api.NewServer(fmt.Sprintf(":%d", port))
+	server := server.NewServer(fmt.Sprintf(":%d", port))
 	// I KNOW
 	log.Println("Server started on port", port)
 	err := server.Run()

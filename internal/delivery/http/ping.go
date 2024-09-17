@@ -1,11 +1,11 @@
-package handlers
+package http
 
 import (
 	"io"
 	"log"
 	"net/http"
 	"strconv"
-	"zoob-back/utils"
+	"zoob-back/internal/utils"
 )
 
 func Ping(w http.ResponseWriter, r *http.Request) {
