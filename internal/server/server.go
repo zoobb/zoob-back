@@ -29,12 +29,12 @@ func (s *Server) Run() error {
 	listItemID := 0
 
 	router := http.NewServeMux()
-	router.HandleFunc("POST /", handler.Ping)
+	router.HandleFunc("POST /ping", handler.Ping)
 	router.HandleFunc("GET /list", handler.GetAll(todoList))
-	router.HandleFunc("POST /add", handler.AddToList(todoList, &listItemID))
-	router.HandleFunc("GET /read/{id}", handler.ReadFromList(todoList))
-	router.HandleFunc("PUT /update/{id}", handler.UpdateListItem(todoList))
-	router.HandleFunc("DELETE /delete/{id}", handler.DeleteListItem(todoList))
+	router.HandleFunc("POST /list", handler.AddToList(todoList, &listItemID))
+	router.HandleFunc("GET /list/{id}", handler.ReadFromList(todoList))
+	router.HandleFunc("PUT /list/{id}", handler.UpdateListItem(todoList))
+	router.HandleFunc("DELETE /list/{id}", handler.DeleteListItem(todoList))
 
 	return http.ListenAndServe(s.addr, withCORS(router))
 }
