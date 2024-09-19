@@ -23,7 +23,7 @@ type ReqBody struct {
 
 func AddToList(list *TodoList, listItemID *int) http.HandlerFunc {
 	return func(rw http.ResponseWriter, req *http.Request) {
-		rw.Header().Set("Access-Control-Allow-Origin", "*")
+		//rw.Header().Set("Access-Control-Allow-Origin", "*")
 
 		var reqBody ReqBody
 		err := json.NewDecoder(req.Body).Decode(&reqBody)
@@ -45,7 +45,7 @@ func AddToList(list *TodoList, listItemID *int) http.HandlerFunc {
 
 func ReadFromList(list *TodoList) http.HandlerFunc {
 	return func(rw http.ResponseWriter, req *http.Request) {
-		rw.Header().Set("Access-Control-Allow-Origin", "*")
+		//rw.Header().Set("Access-Control-Allow-Origin", "*")
 
 		parsedID, err := strconv.Atoi(req.PathValue("id"))
 		if err != nil {
@@ -66,7 +66,7 @@ func ReadFromList(list *TodoList) http.HandlerFunc {
 
 func UpdateListItem(list *TodoList) http.HandlerFunc {
 	return func(rw http.ResponseWriter, req *http.Request) {
-		rw.Header().Set("Access-Control-Allow-Origin", "*")
+		//rw.Header().Set("Access-Control-Allow-Origin", "*")
 
 		parsedID, err := strconv.Atoi(req.PathValue("id"))
 		if err != nil {
@@ -94,7 +94,7 @@ func UpdateListItem(list *TodoList) http.HandlerFunc {
 
 func DeleteListItem(list *TodoList) http.HandlerFunc {
 	return func(rw http.ResponseWriter, req *http.Request) {
-		rw.Header().Set("Access-Control-Allow-Origin", "*")
+		//rw.Header().Set("Access-Control-Allow-Origin", "*")
 
 		parsedID, err := strconv.Atoi(req.PathValue("id"))
 		if err != nil {
@@ -108,6 +108,19 @@ func DeleteListItem(list *TodoList) http.HandlerFunc {
 
 		list.Items[parsedID].Content = ""
 		fmt.Println(list)
+		rw.WriteHeader(http.StatusOK)
+	}
+}
+
+func GetAll(list *TodoList) http.HandlerFunc {
+	return func(rw http.ResponseWriter, req *http.Request) {
+		//rw.Header().Set("Access-Control-Allow-Origin", "*")
+		rw.Header().Set("Content-Type", "application/json")
+
+		err := json.NewEncoder(rw).Encode(list)
+		if err != nil {
+			return
+		}
 		rw.WriteHeader(http.StatusOK)
 	}
 }
