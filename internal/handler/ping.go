@@ -9,7 +9,7 @@ import (
 )
 
 func Ping(rw http.ResponseWriter, req *http.Request) {
-	rw.Header().Set("Access-Control-Allow-Origin", "*")
+	//rw.Header().Set("Access-Control-Allow-Origin", "*")
 
 	reqBody, err := io.ReadAll(req.Body)
 	if err != nil {
