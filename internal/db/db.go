@@ -5,6 +5,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"log"
 	"net/url"
+	"zoob-back/internal/handler"
 )
 
 /*type Database struct {
@@ -86,13 +87,23 @@ func DeleteListItem(id int) error {
 	}
 	return nil
 }
-func GetAll() error {
-	queryString := ""
+func GetAll() ([]handler.ListItem, error) {
+	queryString := "SELECT item_id, content FROM todo.public.list_item"
 	rows, err := Database.Query(context.Background(), queryString)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer rows.Close()
 
-	return nil
+	var list []handler.ListItem
+
+	for rows.Next() {
+		var item handler.ListItem
+		if err := rows.Scan(&item.ItemID, &item.Content); err != nil {
+			return nil, err
+		}
+		list = append(list)
+	}
+
+	return list, nil
 }

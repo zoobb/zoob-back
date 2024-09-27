@@ -189,7 +189,7 @@ func DeleteListItem() http.HandlerFunc {
 	}
 }
 
-func GetAll(list *TodoList) http.HandlerFunc {
+/*func GetAll(list *TodoList) http.HandlerFunc {
 	return func(rw http.ResponseWriter, req *http.Request) {
 		rw.Header().Set("Content-Type", "application/json")
 
@@ -198,6 +198,21 @@ func GetAll(list *TodoList) http.HandlerFunc {
 			log.Println(err)
 			return
 		}
+		rw.WriteHeader(http.StatusOK)
+	}
+}*/
+
+func GetAll() http.HandlerFunc {
+	return func(rw http.ResponseWriter, req *http.Request) {
+		rw.Header().Set("Content-Type", "application/json")
+
+		list, err := db.GetAll()
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		err = json.NewEncoder(rw).Encode(list)
+
 		rw.WriteHeader(http.StatusOK)
 	}
 }
