@@ -101,9 +101,8 @@ func GetAll() ([]ListItem, error) {
 		if err := rows.Scan(&item.ItemID, &item.Content); err != nil {
 			return nil, err
 		}
-		list = append(list)
+		list = append(list, item)
 	}
-
 	return list, nil
 }
 func DeleteAll() error {
