@@ -106,3 +106,11 @@ func GetAll() ([]ListItem, error) {
 
 	return list, nil
 }
+func DeleteAll() error {
+	queryString := "TRUNCATE TABLE todo.public.list_item"
+	_, err := Database.Exec(context.Background(), queryString)
+	if err != nil {
+		return err
+	}
+	return nil
+}

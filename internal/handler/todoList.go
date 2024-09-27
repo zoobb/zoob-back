@@ -208,11 +208,13 @@ func GetAll() http.HandlerFunc {
 	}
 }
 
-/*func DeleteAll(list *TodoList, listItemID *int) http.HandlerFunc {
+func DeleteAll() http.HandlerFunc {
 	return func(rw http.ResponseWriter, req *http.Request) {
-		list.Items = []ListItem{}
-		*listItemID = 0
+		err := db.DeleteAll()
+		if err != nil {
+			return
+		}
 
 		rw.WriteHeader(http.StatusOK)
 	}
-}*/
+}

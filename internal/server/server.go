@@ -35,7 +35,7 @@ func (s *Server) Run() error {
 	router := http.NewServeMux()
 	router.HandleFunc("POST /ping", handler.Ping)
 	router.HandleFunc("GET /list", handler.GetAll())
-	//router.HandleFunc("DELETE /list", handler.DeleteAll(todoList, &listItemID))
+	router.HandleFunc("DELETE /list", handler.DeleteAll())
 	router.HandleFunc("POST /list", handler.AddToList())
 	router.HandleFunc("GET /list/{id}", handler.ReadFromList())
 	router.HandleFunc("PUT /list/{id}", handler.UpdateListItem())
