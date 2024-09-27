@@ -8,15 +8,6 @@ import (
 	"zoob-back/internal/db"
 )
 
-type TodoList struct {
-	Items []ListItem
-}
-
-type ListItem struct {
-	ItemID  int    `json:"item_id"`
-	Content string `json:"content"`
-}
-
 type ReqBody struct {
 	UserData string `json:"user_data"`
 }
@@ -217,11 +208,11 @@ func GetAll() http.HandlerFunc {
 	}
 }
 
-func DeleteAll(list *TodoList, listItemID *int) http.HandlerFunc {
+/*func DeleteAll(list *TodoList, listItemID *int) http.HandlerFunc {
 	return func(rw http.ResponseWriter, req *http.Request) {
 		list.Items = []ListItem{}
 		*listItemID = 0
 
 		rw.WriteHeader(http.StatusOK)
 	}
-}
+}*/
