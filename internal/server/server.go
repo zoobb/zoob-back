@@ -36,17 +36,16 @@ func (s *Server) Run() error {
 		Name:     "todo",
 		Host:     "localhost:9000",
 	}
-	todoDB := db.Connect(todoDBCredentials)
+	db.Connect(todoDBCredentials)
 
 	router := http.NewServeMux()
 	router.HandleFunc("POST /ping", handler.Ping)
 	router.HandleFunc("GET /list", handler.GetAll(todoList))
 	router.HandleFunc("DELETE /list", handler.DeleteAll(todoList, &listItemID))
-	//router.HandleFunc("POST /list", handler.AddToList(todoList, &listItemID))
-	router.HandleFunc("POST /list", handler.AddToList(todoDB))
-	router.HandleFunc("GET /list/{id}", handler.ReadFromList(todoList))
-	router.HandleFunc("PUT /list/{id}", handler.UpdateListItem(todoList))
-	router.HandleFunc("DELETE /list/{id}", handler.DeleteListItem(todoList))
+	router.HandleFunc("POST /list", handler.AddToList())
+	router.HandleFunc("GET /list/{id}", handler.ReadFromList())
+	router.HandleFunc("PUT /list/{id}", handler.UpdateListItem())
+	router.HandleFunc("DELETE /list/{id}", handler.DeleteListItem())
 
 	return http.ListenAndServe(s.addr, withCORS(router, todoList))
 }

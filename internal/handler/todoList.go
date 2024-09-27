@@ -2,10 +2,10 @@ package handler
 
 import (
 	"encoding/json"
-	"github.com/jackc/pgx/v5"
 	"log"
 	"net/http"
 	"strconv"
+	"zoob-back/internal/db"
 )
 
 type TodoList struct {
@@ -40,13 +40,27 @@ type ReqBody struct {
 	}
 }*/
 
-func AddToList(d *pgx.Conn) http.HandlerFunc {
+func AddToList() http.HandlerFunc {
 	return func(rw http.ResponseWriter, req *http.Request) {
+		var reqBody ReqBody
+		err := json.NewDecoder(req.Body).Decode(&reqBody)
+		if err != nil {
+			http.Error(rw, "Invalid request body", http.StatusBadRequest)
+			return
+		}
+		log.Println("Request body:", reqBody)
 
+		err = db.AddToList(reqBody.UserData)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+
+		rw.WriteHeader(http.StatusOK)
 	}
 }
 
-func ReadFromList(list *TodoList) http.HandlerFunc {
+/*func ReadFromList(list *TodoList) http.HandlerFunc {
 	return func(rw http.ResponseWriter, req *http.Request) {
 		parsedID, err := strconv.Atoi(req.PathValue("id"))
 		if err != nil {
@@ -63,9 +77,33 @@ func ReadFromList(list *TodoList) http.HandlerFunc {
 		}
 		rw.WriteHeader(http.StatusOK)
 	}
+}*/
+
+func ReadFromList() http.HandlerFunc {
+	return func(rw http.ResponseWriter, req *http.Request) {
+		parsedID, err := strconv.Atoi(req.PathValue("id"))
+		if err != nil {
+			rw.WriteHeader(http.StatusBadRequest)
+			log.Println(err)
+			return
+		}
+		var selection string
+		selection, err = db.ReadFromList(parsedID)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		_, err = rw.Write([]byte(selection))
+		if err != nil {
+			log.Println(err)
+			return
+		}
+
+		rw.WriteHeader(http.StatusOK)
+	}
 }
 
-func UpdateListItem(list *TodoList) http.HandlerFunc {
+/*func UpdateListItem(list *TodoList) http.HandlerFunc {
 	return func(rw http.ResponseWriter, req *http.Request) {
 		parsedID, err := strconv.Atoi(req.PathValue("id"))
 		if err != nil {
@@ -88,9 +126,35 @@ func UpdateListItem(list *TodoList) http.HandlerFunc {
 		list.Items[parsedID].Content = reqBody.UserData
 		rw.WriteHeader(http.StatusOK)
 	}
+}*/
+
+func UpdateListItem() http.HandlerFunc {
+	return func(rw http.ResponseWriter, req *http.Request) {
+		parsedID, err := strconv.Atoi(req.PathValue("id"))
+		if err != nil {
+			rw.WriteHeader(http.StatusBadRequest)
+			log.Println(err)
+			return
+		}
+
+		var reqBody ReqBody
+		err = json.NewDecoder(req.Body).Decode(&reqBody)
+		if err != nil {
+			http.Error(rw, "Invalid request body", http.StatusBadRequest)
+			log.Println(err)
+			return
+		}
+		log.Println("Request body:", reqBody)
+		err = db.UpdateListItem(parsedID, reqBody.UserData)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		rw.WriteHeader(http.StatusOK)
+	}
 }
 
-func DeleteListItem(list *TodoList) http.HandlerFunc {
+/*func DeleteListItem(list *TodoList) http.HandlerFunc {
 	return func(rw http.ResponseWriter, req *http.Request) {
 		parsedID, err := strconv.Atoi(req.PathValue("id"))
 		if err != nil {
@@ -105,6 +169,24 @@ func DeleteListItem(list *TodoList) http.HandlerFunc {
 		list.Items[parsedID].Content = ""
 		rw.WriteHeader(http.StatusOK)
 	}
+}*/
+
+func DeleteListItem() http.HandlerFunc {
+	return func(rw http.ResponseWriter, req *http.Request) {
+		parsedID, err := strconv.Atoi(req.PathValue("id"))
+		if err != nil {
+			rw.WriteHeader(http.StatusBadRequest)
+			log.Println(err)
+			return
+		}
+
+		err = db.DeleteListItem(parsedID)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		rw.WriteHeader(http.StatusOK)
+	}
 }
 
 func GetAll(list *TodoList) http.HandlerFunc {
@@ -113,6 +195,7 @@ func GetAll(list *TodoList) http.HandlerFunc {
 
 		err := json.NewEncoder(rw).Encode(list)
 		if err != nil {
+			log.Println(err)
 			return
 		}
 		rw.WriteHeader(http.StatusOK)

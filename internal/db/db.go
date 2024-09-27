@@ -62,7 +62,7 @@ func AddToList(content string) error {
 	return nil
 }
 func ReadFromList(id int) (string, error) {
-	queryString := "SELECT FROM todo.public.list_item WHERE item_id = $1"
+	queryString := "SELECT content FROM todo.public.list_item WHERE item_id = $1"
 	var selection string
 	err := Database.QueryRow(context.Background(), queryString, id).Scan(&selection)
 	if err != nil {
@@ -84,5 +84,15 @@ func DeleteListItem(id int) error {
 	if err != nil {
 		return err
 	}
+	return nil
+}
+func GetAll() error {
+	queryString := ""
+	rows, err := Database.Query(context.Background(), queryString)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+
 	return nil
 }
