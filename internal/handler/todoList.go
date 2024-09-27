@@ -2,7 +2,7 @@ package handler
 
 import (
 	"encoding/json"
-	"fmt"
+	"github.com/jackc/pgx/v5"
 	"log"
 	"net/http"
 	"strconv"
@@ -21,10 +21,8 @@ type ReqBody struct {
 	UserData string `json:"user_data"`
 }
 
-func AddToList(list *TodoList, listItemID *int) http.HandlerFunc {
+/*func AddToList(list *TodoList, listItemID *int) http.HandlerFunc {
 	return func(rw http.ResponseWriter, req *http.Request) {
-		//rw.Header().Set("Access-Control-Allow-Origin", "*")
-
 		var reqBody ReqBody
 		err := json.NewDecoder(req.Body).Decode(&reqBody)
 		if err != nil {
@@ -38,15 +36,18 @@ func AddToList(list *TodoList, listItemID *int) http.HandlerFunc {
 			Content: reqBody.UserData,
 		})
 		*listItemID += 1
-		fmt.Println(list)
 		rw.WriteHeader(http.StatusOK)
+	}
+}*/
+
+func AddToList(d *pgx.Conn) http.HandlerFunc {
+	return func(rw http.ResponseWriter, req *http.Request) {
+
 	}
 }
 
 func ReadFromList(list *TodoList) http.HandlerFunc {
 	return func(rw http.ResponseWriter, req *http.Request) {
-		//rw.Header().Set("Access-Control-Allow-Origin", "*")
-
 		parsedID, err := strconv.Atoi(req.PathValue("id"))
 		if err != nil {
 			rw.WriteHeader(http.StatusBadRequest)
@@ -66,8 +67,6 @@ func ReadFromList(list *TodoList) http.HandlerFunc {
 
 func UpdateListItem(list *TodoList) http.HandlerFunc {
 	return func(rw http.ResponseWriter, req *http.Request) {
-		//rw.Header().Set("Access-Control-Allow-Origin", "*")
-
 		parsedID, err := strconv.Atoi(req.PathValue("id"))
 		if err != nil {
 			rw.WriteHeader(http.StatusBadRequest)
@@ -87,15 +86,12 @@ func UpdateListItem(list *TodoList) http.HandlerFunc {
 		log.Println("Request body:", reqBody)
 
 		list.Items[parsedID].Content = reqBody.UserData
-		fmt.Println(list)
 		rw.WriteHeader(http.StatusOK)
 	}
 }
 
 func DeleteListItem(list *TodoList) http.HandlerFunc {
 	return func(rw http.ResponseWriter, req *http.Request) {
-		//rw.Header().Set("Access-Control-Allow-Origin", "*")
-
 		parsedID, err := strconv.Atoi(req.PathValue("id"))
 		if err != nil {
 			rw.WriteHeader(http.StatusBadRequest)
@@ -107,20 +103,27 @@ func DeleteListItem(list *TodoList) http.HandlerFunc {
 		}
 
 		list.Items[parsedID].Content = ""
-		fmt.Println(list)
 		rw.WriteHeader(http.StatusOK)
 	}
 }
 
 func GetAll(list *TodoList) http.HandlerFunc {
 	return func(rw http.ResponseWriter, req *http.Request) {
-		//rw.Header().Set("Access-Control-Allow-Origin", "*")
 		rw.Header().Set("Content-Type", "application/json")
 
 		err := json.NewEncoder(rw).Encode(list)
 		if err != nil {
 			return
 		}
+		rw.WriteHeader(http.StatusOK)
+	}
+}
+
+func DeleteAll(list *TodoList, listItemID *int) http.HandlerFunc {
+	return func(rw http.ResponseWriter, req *http.Request) {
+		list.Items = []ListItem{}
+		*listItemID = 0
+
 		rw.WriteHeader(http.StatusOK)
 	}
 }

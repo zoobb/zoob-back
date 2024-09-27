@@ -1,8 +1,10 @@
 package server
 
 import (
+	"fmt"
 	"log"
 	"net/http"
+	"zoob-back/internal/db"
 	"zoob-back/internal/handler"
 )
 
@@ -28,18 +30,28 @@ func (s *Server) Run() error {
 	}
 	listItemID := 0
 
+	todoDBCredentials := db.Credentials{
+		User:     "zoob",
+		Password: "1111",
+		Name:     "todo",
+		Host:     "localhost:9000",
+	}
+	todoDB := db.Connect(todoDBCredentials)
+
 	router := http.NewServeMux()
 	router.HandleFunc("POST /ping", handler.Ping)
 	router.HandleFunc("GET /list", handler.GetAll(todoList))
-	router.HandleFunc("POST /list", handler.AddToList(todoList, &listItemID))
+	router.HandleFunc("DELETE /list", handler.DeleteAll(todoList, &listItemID))
+	//router.HandleFunc("POST /list", handler.AddToList(todoList, &listItemID))
+	router.HandleFunc("POST /list", handler.AddToList(todoDB))
 	router.HandleFunc("GET /list/{id}", handler.ReadFromList(todoList))
 	router.HandleFunc("PUT /list/{id}", handler.UpdateListItem(todoList))
 	router.HandleFunc("DELETE /list/{id}", handler.DeleteListItem(todoList))
 
-	return http.ListenAndServe(s.addr, withCORS(router))
+	return http.ListenAndServe(s.addr, withCORS(router, todoList))
 }
 
-func withCORS(next http.Handler) http.Handler {
+func withCORS(next http.Handler, list *handler.TodoList) http.Handler {
 	return http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 		rw.Header().Set("Access-Control-Allow-Origin", "*")
 		rw.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
@@ -51,5 +63,7 @@ func withCORS(next http.Handler) http.Handler {
 		}
 
 		next.ServeHTTP(rw, req)
+
+		fmt.Println(list)
 	})
 }
