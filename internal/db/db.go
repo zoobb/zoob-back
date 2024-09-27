@@ -7,28 +7,6 @@ import (
 	"net/url"
 )
 
-/*type Database struct {
-	User     string
-	Password string
-	Name     string
-	Host     string
-}
-
-func (d Database) New() *pgx.Conn {
-	u := url.URL{
-		Scheme: "postgres",
-		User:   url.UserPassword(d.User, d.Password),
-		Host:   d.Host,
-		Path:   d.Name,
-	}
-
-	connection, err := pgx.Connect(context.Background(), u.String())
-	if err != nil {
-		log.Println("There is an error occurred Connection to the Postgres:", err)
-	}
-	return connection
-}*/
-
 type Credentials struct {
 	User     string
 	Password string
@@ -72,17 +50,23 @@ func ReadFromList(id int) (string, error) {
 }
 func UpdateListItem(id int, content string) error {
 	queryString := "UPDATE todo.public.list_item SET content = $1 WHERE item_id = $2"
-	_, err := Database.Exec(context.Background(), queryString, content, id)
+	rows, err := Database.Exec(context.Background(), queryString, content, id)
 	if err != nil {
 		return err
+	}
+	if rows.RowsAffected() == 0 {
+		return pgx.ErrNoRows
 	}
 	return nil
 }
 func DeleteListItem(id int) error {
 	queryString := "DELETE FROM todo.public.list_item WHERE item_id = $1"
-	_, err := Database.Exec(context.Background(), queryString, id)
+	rows, err := Database.Exec(context.Background(), queryString, id)
 	if err != nil {
 		return err
+	}
+	if rows.RowsAffected() == 0 {
+		return pgx.ErrNoRows
 	}
 	return nil
 }
