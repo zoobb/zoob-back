@@ -71,7 +71,7 @@ func DeleteListItem(id int) error {
 	return nil
 }
 func GetAll() ([]ListItem, error) {
-	queryString := "SELECT item_id, content FROM todo.public.list_item"
+	queryString := "SELECT item_id, content FROM todo.public.list_item ORDER BY item_id"
 	rows, err := Database.Query(context.Background(), queryString)
 	if err != nil {
 		return nil, err

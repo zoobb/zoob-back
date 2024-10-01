@@ -78,7 +78,7 @@ func UpdateListItem() http.HandlerFunc {
 			log.Println(err)
 			return
 		}
-		log.Println("Request body:", reqBody)
+		log.Println("Request body:", reqBody, parsedID)
 		err = db.UpdateListItem(parsedID, reqBody.UserData)
 		if errors.Is(err, pgx.ErrNoRows) {
 			rw.WriteHeader(http.StatusNotFound)
@@ -126,8 +126,6 @@ func GetAll() http.HandlerFunc {
 			return
 		}
 		err = json.NewEncoder(rw).Encode(list)
-
-		rw.WriteHeader(http.StatusOK)
 	}
 }
 func DeleteAll() http.HandlerFunc {
