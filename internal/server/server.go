@@ -34,6 +34,8 @@ func (s *Server) Run() error {
 
 	router := http.NewServeMux()
 	router.HandleFunc("POST /ping", handler.Ping)
+	router.HandleFunc("POST /auth/sign_up", handler.SignUp())
+	router.HandleFunc("POST /auth/log_in", handler.LogIn())
 	router.HandleFunc("GET /list", handler.GetAll())
 	router.HandleFunc("DELETE /list", handler.DeleteAll())
 	router.HandleFunc("POST /list", handler.AddToList())

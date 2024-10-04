@@ -2,9 +2,14 @@ package db
 
 import (
 	"context"
+	"errors"
+	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 	"log"
 	"net/url"
+	"zoob-back/internal/auth"
+	"zoob-back/internal/models"
 )
 
 type Credentials struct {
@@ -31,6 +36,34 @@ func Connect(credentials Credentials) *pgx.Conn {
 	return Database
 }
 
+func SignUp(login string, pass string) error {
+	passHash, err := auth.EncryptPass(pass)
+	if err != nil {
+		return err
+	}
+	queryString := "INSERT INTO todo.public.users(login, password_hash) VALUES ($1, $2)"
+	_, err = Database.Exec(context.Background(), queryString, login, passHash)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+func GetPassHash(login string) (string, error) {
+	var parsedPassHash string
+	queryString := "SELECT password_hash FROM todo.public.users WHERE login = $1"
+	err := Database.QueryRow(context.Background(), queryString, login).Scan(&parsedPassHash)
+	if err != nil {
+		return "", err
+	}
+	var pgErr *pgconn.PgError
+	errors.As(err, &pgErr)
+	if pgErr.Code == pgerrcode.UniqueViolation {
+		//err = fmt.Errorf("duplicate key value violates unique constraint: %w", err)
+	}
+
+	return parsedPassHash, nil
+}
 func AddToList(content string) error {
 	queryString := "INSERT INTO todo.public.list_item(content) VALUES ($1)"
 	_, err := Database.Exec(context.Background(), queryString, content)
@@ -70,7 +103,7 @@ func DeleteListItem(id int) error {
 	}
 	return nil
 }
-func GetAll() ([]ListItem, error) {
+func GetAll() ([]models.ListItem, error) {
 	queryString := "SELECT item_id, content FROM todo.public.list_item ORDER BY item_id"
 	rows, err := Database.Query(context.Background(), queryString)
 	if err != nil {
@@ -78,10 +111,10 @@ func GetAll() ([]ListItem, error) {
 	}
 	defer rows.Close()
 
-	var list []ListItem
+	var list []models.ListItem
 
 	for rows.Next() {
-		var item ListItem
+		var item models.ListItem
 		if err := rows.Scan(&item.ItemID, &item.Content); err != nil {
 			return nil, err
 		}

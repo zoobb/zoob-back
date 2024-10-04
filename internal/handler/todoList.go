@@ -3,20 +3,54 @@ package handler
 import (
 	"encoding/json"
 	"errors"
+	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 	"log"
 	"net/http"
 	"strconv"
+	"zoob-back/internal/auth"
 	"zoob-back/internal/db"
+	"zoob-back/internal/models"
 )
 
-type ReqBody struct {
-	UserData string `json:"user_data"`
+func SignUp() http.HandlerFunc {
+	return func(rw http.ResponseWriter, req *http.Request) {
+		var ReqBody models.AuthReqBody
+		err := json.NewDecoder(req.Body).Decode(&ReqBody)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		err = db.SignUp(ReqBody.Login, ReqBody.Pass)
+		if err != nil {
+			log.Println(err)
+		}
+		var pgErr *pgconn.PgError
+		errors.As(err, &pgErr)
+		if pgErr.Code == pgerrcode.UniqueViolation {
+			rw.WriteHeader(http.StatusBadRequest)
+			return
+		}
+	}
 }
-
+func LogIn() http.HandlerFunc {
+	return func(rw http.ResponseWriter, req *http.Request) {
+		var ReqBody models.AuthReqBody
+		err := json.NewDecoder(req.Body).Decode(&ReqBody)
+		if err != nil {
+			return
+		}
+		passHash, err := db.GetPassHash(ReqBody.Login)
+		err = json.NewEncoder(rw).Encode(auth.CheckPass(ReqBody.Pass, passHash))
+		if err != nil {
+			return
+		}
+	}
+}
 func AddToList() http.HandlerFunc {
 	return func(rw http.ResponseWriter, req *http.Request) {
-		var reqBody ReqBody
+		var reqBody models.ListReqBody
 		err := json.NewDecoder(req.Body).Decode(&reqBody)
 		if err != nil {
 			http.Error(rw, "Invalid request body", http.StatusBadRequest)
@@ -71,7 +105,7 @@ func UpdateListItem() http.HandlerFunc {
 			return
 		}
 
-		var reqBody ReqBody
+		var reqBody models.ListReqBody
 		err = json.NewDecoder(req.Body).Decode(&reqBody)
 		if err != nil {
 			http.Error(rw, "Invalid request body", http.StatusBadRequest)

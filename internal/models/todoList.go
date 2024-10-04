@@ -1,4 +1,4 @@
-package db
+package models
 
 type TodoList struct {
 	Items []ListItem
