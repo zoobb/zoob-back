@@ -4,7 +4,7 @@ Server application for todo app, developed with Go, native library net/http, and
 
 This app provides REST API of todo app with CRUD functionality implemented and Postgres database usage
 
-Among all features:
+Among all the features:
 - Complete REST API
 - CRUD operations
 - Postgres Database
