@@ -3,6 +3,8 @@ package server
 import (
 	"log"
 	"net/http"
+	"strings"
+	"zoob-back/internal/auth"
 	"zoob-back/internal/db"
 	"zoob-back/internal/handler"
 )
@@ -57,6 +59,30 @@ func withCORS(next http.Handler) http.Handler {
 			return
 		}
 
+		next.ServeHTTP(rw, req)
+	})
+
+}
+func AuthMW(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+		authHeader := req.Header.Get("Authorization")
+		if authHeader == "" {
+			http.Error(rw, "Authorization header missing", http.StatusUnauthorized)
+			return
+		}
+
+		parts := strings.Split(authHeader, " ")
+		if len(parts) != 2 || parts[0] != "Bearer" {
+			http.Error(rw, "Invalid authorization header format", http.StatusUnauthorized)
+			return
+		}
+
+		tokenString := parts[1]
+		_, err := auth.ValidateToken(tokenString)
+		if err != nil {
+			http.Error(rw, "Invalid or expired token", http.StatusUnauthorized)
+			return
+		}
 		next.ServeHTTP(rw, req)
 	})
 }

@@ -2,14 +2,11 @@ package db
 
 import (
 	"context"
-	"errors"
-	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgconn"
 	"log"
 	"net/url"
 	"zoob-back/internal/auth"
-	"zoob-back/internal/models"
+	"zoob-back/internal/types"
 )
 
 type Credentials struct {
@@ -56,11 +53,11 @@ func GetPassHash(login string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	var pgErr *pgconn.PgError
-	errors.As(err, &pgErr)
-	if pgErr.Code == pgerrcode.UniqueViolation {
-		//err = fmt.Errorf("duplicate key value violates unique constraint: %w", err)
-	}
+	//var pgErr *pgconn.PgError
+	//errors.As(err, &pgErr)
+	//if pgErr.Code == pgerrcode.UniqueViolation {
+	//	//err = fmt.Errorf("duplicate key value violates unique constraint: %w", err)
+	//}
 
 	return parsedPassHash, nil
 }
@@ -103,7 +100,7 @@ func DeleteListItem(id int) error {
 	}
 	return nil
 }
-func GetAll() ([]models.ListItem, error) {
+func GetAll() ([]types.ListItem, error) {
 	queryString := "SELECT item_id, content FROM todo.public.list_item ORDER BY item_id"
 	rows, err := Database.Query(context.Background(), queryString)
 	if err != nil {
@@ -111,10 +108,10 @@ func GetAll() ([]models.ListItem, error) {
 	}
 	defer rows.Close()
 
-	var list []models.ListItem
+	var list []types.ListItem
 
 	for rows.Next() {
-		var item models.ListItem
+		var item types.ListItem
 		if err := rows.Scan(&item.ItemID, &item.Content); err != nil {
 			return nil, err
 		}

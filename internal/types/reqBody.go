@@ -1,4 +1,4 @@
-package models
+package types
 
 type AuthReqBody struct {
 	Login string `json:"login"`
