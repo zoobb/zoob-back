@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/zoob-back.iml" filepath="$PROJECT_DIR$/.idea/zoob-back.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/todo-list-backend.iml" filepath="$PROJECT_DIR$/.idea/todo-list-backend.iml" />
     </modules>
   </component>
 </project>
